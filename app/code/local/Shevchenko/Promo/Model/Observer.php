@@ -29,8 +29,9 @@ class Shevchenko_Promo_Model_Observer
                     $x = $image->getOriginalWidth();
                     $y = $image->getOriginalHeight();
 
-                    if ($x < 300 | $y < 300) {
-                        throw new Exception('The size should be more than 300 pixels');
+                    if ($x < 300 || $y < 300) {
+                        throw new Exception( Mage::helper('shevchenko_promo')
+                            ->__('The size should be more than 300 pixels'));
                     }
                     $uploadedImg = $uploader->save($path, $_FILES['image']['name']);
 
@@ -39,8 +40,9 @@ class Shevchenko_Promo_Model_Observer
                     }
 
                     if ($size = $data['size']) {
-                        if ($size < 10 | $size > 100) {
-                            throw new Exception('Please enter the correct size (from 10 to 100)');
+                        if ($size < 10 || $size > 100) {
+                            throw new Exception( Mage::helper('shevchenko_promo')
+                                ->__('Please enter the correct size (from 10 to 100)'));
                         }
                         $modelData['image_size'] = $data['size'];
                     } else {
@@ -48,8 +50,9 @@ class Shevchenko_Promo_Model_Observer
                     }
 
                     if ($op = $data['opacity']) {
-                        if ($op < 0 | $op > 100) {
-                            throw new Exception('Please enter the correct opacity (from 0 to 100)');
+                        if ($op < 0 || $op > 100) {
+                            throw new Exception( Mage::helper('shevchenko_promo')
+                                ->__('Please enter the correct opacity (from 0 to 100)'));
                         }
                         $modelData['image_opacity'] = $data['opacity'];
                     } else {
@@ -74,5 +77,46 @@ class Shevchenko_Promo_Model_Observer
                 $model->save();
             }
         }
+    }
+
+
+    public function adminhtmlBlockHtmlBefore($observer){
+
+        $block = $observer->getEvent()->getBlock();
+        if (!isset($block)) {
+            return $this;
+        }
+        if ($block->getType() == 'adminhtml/promo_catalog_edit_tab_actions') {
+            $model = Mage::registry('current_promo_catalog_rule');
+            $form = $block->getForm();
+            //create new custom fieldset 'website'
+            $fieldset = $form->addFieldset('action_fieldset2', array(
+                    'legend' => Mage::helper('shevchenko_promo')->__('Image for the rule'),                )
+            );
+            //create new custom fieldset 'website'
+            //Custom Image
+            $fieldset->addField('shevchenko_promo_img', 'image', array(
+                'label'     => Mage::helper('shevchenko_promo')->__('Image'),
+                'required'  => false,
+                'name'      => 'image',
+            ));
+
+            $fieldset->addField('image_size', 'text', array(
+                'label'     => Mage::helper('shevchenko_promo')->__('Size percent'),
+                'name'      => 'size',
+                'value'  => '50',
+                'after_element_html' => '<small>' . Mage::helper('shevchenko_promo')
+                        ->__('Specify the percentage of the image (from 10 to 100)') . '</small>',
+            ));
+
+            $fieldset->addField('image_opacity', 'text', array(
+                'label'     => Mage::helper('shevchenko_promo')->__('Opacity percent'),
+                'name'      => 'opacity',
+                'after_element_html' =>  '<small>' . Mage::helper('catalogrule')
+                        ->__('Specify opacity in the percentage') . '</small>',
+            ));
+            $form->setValues($model->getData());
+        }
+        return $this;
     }
 }
