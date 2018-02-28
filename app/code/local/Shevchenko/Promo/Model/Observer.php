@@ -119,4 +119,19 @@ class Shevchenko_Promo_Model_Observer
         }
         return $this;
     }
+
+    public function catalogControllerProductView($observer)
+    {
+        $product = $observer->getProduct();
+        $ruleId = Mage::getModel('shevchenko_promo/catalogrule')->checkRuleApply($product);
+        if ($ruleId) {
+            $promoLabel = Mage::helper('shevchenko_promo')->__('"(Promo)"');
+            $name = $product->getName();
+            $product->addData(['name' => $promoLabel . ' ' . $name]);
+            if (Mage::registry('product')){
+                Mage::unregister('product');
+            }
+            Mage::register('product', $product);
+        }
+    }
 }

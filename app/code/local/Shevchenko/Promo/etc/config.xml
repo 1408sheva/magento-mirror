@@ -60,4 +60,18 @@
             </adminhtml_block_html_before>
         </events>
     </adminhtml>
+    <frontend>
+        <events>
+            <catalog_controller_product_view>
+                <observers>
+                    <promo_product_view>
+                        <type>model</type>
+                        <class>shevchenko_promo/observer</class>
+                        <method>catalogControllerProductView</method>
+                    </promo_product_view>
+                </observers>
+            </catalog_controller_product_view>
+        </events>
+    </frontend>
+
 </config>
